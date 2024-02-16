@@ -620,6 +620,10 @@ namespace Azure.Costs.Ui.Wpf
             //Process.Start(db.PortalResourceUrl);
         }
 
+        private void StorageDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
     public class ignoresubscriptionnames
     {

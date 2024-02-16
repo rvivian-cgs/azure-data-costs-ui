@@ -59,8 +59,8 @@ namespace Azure.Costs.Common
             if (HttpClient == null)
             {
                 AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
-                _accessToken = await azureServiceTokenProvider.GetAccessTokenAsync("https://management.azure.com/");
-                HttpClient = new MyHttpClient("https://management.azure.com/", 30, _accessToken);
+                _accessToken = await azureServiceTokenProvider.GetAccessTokenAsync("https://management.usgovcloudapi.net/");
+                HttpClient = new MyHttpClient("https://management.usgovcloudapi.net/", 30, _accessToken);
             }
             HttpResponseMessage r = await HttpClient.GetAsync(url);
             return r;
@@ -70,7 +70,7 @@ namespace Azure.Costs.Common
             try
             {
                 // get tenants as a test
-                HttpResponseMessage tenantResponse = await GetHttpClientAsync("https://management.azure.com/tenants?api-version=2022-12-01");
+                HttpResponseMessage tenantResponse = await GetHttpClientAsync("https://management.usgovcloudapi.net/tenants?api-version=2022-12-01");
                 if (!tenantResponse.IsSuccessStatusCode)
                 {
                     return tenantResponse.ReasonPhrase;
@@ -80,7 +80,7 @@ namespace Azure.Costs.Common
                 if (tenants.value.Count > 0)
                 {
                     DefaultDomain = tenants.value[0].defaultDomain;
-                    BasePortalUrl = $@"https://portal.azure.com/#@{DefaultDomain}/resource/subscriptions/";
+                    BasePortalUrl = $@"https://portal.azure.us/#@{DefaultDomain}/resource/subscriptions/";
                 }
             }
             catch (Exception ex)
@@ -94,7 +94,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                HttpResponseMessage response = await GetHttpClientAsync("https://management.azure.com/subscriptions?api-version=2020-01-01");// httpClient.GetAsync("https://management.azure.com/subscriptions?api-version=2020-01-01");
+                HttpResponseMessage response = await GetHttpClientAsync("https://management.usgovcloudapi.net/subscriptions?api-version=2020-01-01");// httpClient.GetAsync("https://management.usgovcloudapi.net/subscriptions?api-version=2020-01-01");
 
                 var json = await response.Content.ReadAsStringAsync();
                 RootSubscription subscriptions = await response?.Content?.ReadFromJsonAsync<RootSubscription>();
@@ -191,7 +191,7 @@ namespace Azure.Costs.Common
             try
             {
 
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/resources?$filter=resourceType eq 'Microsoft.sql/servers'&$expand=resourceGroup,createdTime,changedTime&$top=1000&api-version=2021-04-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/resources?$filter=resourceType eq 'Microsoft.sql/servers'&$expand=resourceGroup,createdTime,changedTime&$top=1000&api-version=2021-04-01";
                 StringContent queryString = new StringContent("api-version=2021-04-01");
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -209,7 +209,7 @@ namespace Azure.Costs.Common
 
                     restSql.AzServer = new AzServer(restSql.name);
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/7a77c7dc-4158-4e23-8b34-adb5bd59db5b/resourceGroups/oct-oi-dev-uks-rg-corp-epool/providers/Microsoft.Sql/servers/oct-oi-dev-uks-sql-corp-epool/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoft.com/resource/subscriptions/7a77c7dc-4158-4e23-8b34-adb5bd59db5b/resourceGroups/oct-oi-dev-uks-rg-corp-epool/providers/Microsoft.Sql/servers/oct-oi-dev-uks-sql-corp-epool/overview
                     restSql.PortalResourceUrl = $@"{BasePortalUrl}subscription.subscriptionId/resourceGroups/{restSql.resourceGroup}/providers/Microsoft.Sql/servers/{restSql.name}/overview";// ends subscriptions/
                 }
                 subscription.SqlServers = servers.value.ToList();
@@ -234,7 +234,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{sqlServer.Subscription.subscriptionId}/resourceGroups/{sqlServer.resourceGroup}/providers/Microsoft.Sql/servers/{sqlServer.name}/elasticpools?api-version=2021-02-01-preview";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlServer.Subscription.subscriptionId}/resourceGroups/{sqlServer.resourceGroup}/providers/Microsoft.Sql/servers/{sqlServer.name}/elasticpools?api-version=2021-02-01-preview";
                 StringContent queryString = new StringContent("api-version=2021-04-01");
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -281,7 +281,7 @@ namespace Azure.Costs.Common
 
             try
             {
-                string dbUrl = $"https://management.azure.com/subscriptions/{sqlServer.Subscription.subscriptionId}/resourceGroups/{sqlServer.resourceGroup}/providers/Microsoft.Sql/servers/{sqlServer.name}/databases?api-version=2021-02-01-preview";              
+                string dbUrl = $"https://management.usgovcloudapi.net/subscriptions/{sqlServer.Subscription.subscriptionId}/resourceGroups/{sqlServer.resourceGroup}/providers/Microsoft.Sql/servers/{sqlServer.name}/databases?api-version=2021-02-01-preview";              
                 var response = await GetHttpClientAsync(dbUrl);
                 var json = await response.Content.ReadAsStringAsync();
                 RootRestSqlDb databases = await response?.Content?.ReadFromJsonAsync<RootRestSqlDb>();                
@@ -295,7 +295,7 @@ namespace Azure.Costs.Common
                     db.AzDB.DatabaseName = db.name;
                     db.AzDB.SetParent(sqlServer.AzServer);
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/7a77c7dc-4158-4e23-8b34-adb5bd59db5b/resourceGroups/oct-oi-dev-uks-rg-corp-epool/providers/Microsoft.Sql/servers/oct-oi-dev-uks-sql-corp-epool/databases/oct-oi-dev-uks-sqldb-corp-amlkyc-api/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoft.com/resource/subscriptions/7a77c7dc-4158-4e23-8b34-adb5bd59db5b/resourceGroups/oct-oi-dev-uks-rg-corp-epool/providers/Microsoft.Sql/servers/oct-oi-dev-uks-sql-corp-epool/databases/oct-oi-dev-uks-sqldb-corp-amlkyc-api/overview
                     db.PortalResourceUrl = $@"{BasePortalUrl}{db.Subscription.subscriptionId}/resourceGroups/{db.resourceGroup}/providers/Microsoft.Sql/servers/{db.serverName}/databases/{db.name}/overview";// ends subscriptions/
 
                     if (db.properties.elasticPoolId != null)
@@ -421,7 +421,7 @@ namespace Azure.Costs.Common
             //Debug.WriteLine("usage 1");
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/usages?api-version=2021-11-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/usages?api-version=2021-11-01";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -458,7 +458,7 @@ namespace Azure.Costs.Common
             {
                 if (sqlDb.IsSynapse) return; // dwh type db not supported
 
-                string url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/advisors?$expand=recommendedActions&api-version=2021-11-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/advisors?$expand=recommendedActions&api-version=2021-11-01";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -494,7 +494,7 @@ namespace Azure.Costs.Common
 
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name.ToLower()}/vulnerabilityAssessments/default/scans?api-version=2020-11-01-preview";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name.ToLower()}/vulnerabilityAssessments/default/scans?api-version=2020-11-01-preview";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -544,7 +544,7 @@ namespace Azure.Costs.Common
             
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/backupLongTermRetentionPolicies/default?api-version=2020-11-01-preview";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -619,7 +619,7 @@ namespace Azure.Costs.Common
                     // get elastic pool costs if required
                     if (sqlDb.ElasticPool.PerformanceMetricSeries.Count > -1)
                     {
-                        string poolUrl = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/elasticPools/{sqlDb.ElasticPool.name}/providers/Microsoft.Insights/metrics?aggregation=average,maximum{timeGrainParam}&timespan={timeFrom}/{timeTo}&metricnames=sessions_count,cpu_percent&api-version=2021-05-01";
+                        string poolUrl = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/elasticPools/{sqlDb.ElasticPool.name}/providers/Microsoft.Insights/metrics?aggregation=average,maximum{timeGrainParam}&timespan={timeFrom}/{timeTo}&metricnames=sessions_count,cpu_percent&api-version=2021-05-01";
 
                         var res = await GetHttpClientAsync(poolUrl);
 
@@ -675,16 +675,16 @@ namespace Azure.Costs.Common
                     }
                 }
                
-                string url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/providers/Microsoft.Insights/metrics?{timeGrainParam}&aggregation=average,maximum&timespan={timeFrom}/{timeTo}&metricnames=physical_data_read_percent,log_write_percent,dtu_consumption_percent,sessions_count,storage,storage_percent,workers_percent,sessions_percent,dtu_limit,dtu_used,sqlserver_process_core_percent,sqlserver_process_memory_percent,tempdb_data_size,tempdb_log_size,tempdb_log_used_percent,allocated_data_storage&api-version=2021-05-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/providers/Microsoft.Insights/metrics?{timeGrainParam}&aggregation=average,maximum&timespan={timeFrom}/{timeTo}&metricnames=physical_data_read_percent,log_write_percent,dtu_consumption_percent,sessions_count,storage,storage_percent,workers_percent,sessions_percent,dtu_limit,dtu_used,sqlserver_process_core_percent,sqlserver_process_memory_percent,tempdb_data_size,tempdb_log_size,tempdb_log_used_percent,allocated_data_storage&api-version=2021-05-01";
                 if (sqlDb.IsVCore) 
                 {
                     // dont get elastic pool metrics - we are still at db level
-                    url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/providers/Microsoft.Insights/metrics?aggregation=average,maximum{timeGrainParam}&timespan={timeFrom}/{timeTo}&metricnames=cpu_percent&api-version=2021-05-01";
+                    url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/providers/Microsoft.Insights/metrics?aggregation=average,maximum{timeGrainParam}&timespan={timeFrom}/{timeTo}&metricnames=cpu_percent&api-version=2021-05-01";
                 }
                 if (sqlDb.IsSynapse)
                 {
                     // DWU used
-                    url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/providers/Microsoft.Insights/metrics?aggregation=average,maximum{timeGrainParam}&timespan={timeFrom}/{timeTo}&metricnames=dwu_consumption_percent&api-version=2021-05-01";
+                    url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/providers/Microsoft.Insights/metrics?aggregation=average,maximum{timeGrainParam}&timespan={timeFrom}/{timeTo}&metricnames=dwu_consumption_percent&api-version=2021-05-01";
                 }
 
                 sqlDb.IsRestQueryBusy = true;
@@ -877,8 +877,8 @@ namespace Azure.Costs.Common
                 string timeFrom = DateTime.UtcNow.AddMinutes(-1 * mins).ToString("s") + "Z";
                 string timeTo = DateTime.UtcNow.ToString("s") + "Z";
 
-                string url = $"https://management.azure.com/subscriptions/{vm.Subscription.subscriptionId}/resourceGroups/{vm.resourceGroup}/providers/Microsoft.Compute/virtualMachines/{vm.name}/providers/Microsoft.Insights/metrics?{timeGrainParam}&aggregation=average,maximum&timespan={timeFrom}/{timeTo}&metricnames=Percentage%20CPU&api-version=2021-05-01";
-                // string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Compute/virtualMachines?api-version=2022-08-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{vm.Subscription.subscriptionId}/resourceGroups/{vm.resourceGroup}/providers/Microsoft.Compute/virtualMachines/{vm.name}/providers/Microsoft.Insights/metrics?{timeGrainParam}&aggregation=average,maximum&timespan={timeFrom}/{timeTo}&metricnames=Percentage%20CPU&api-version=2021-05-01";
+                // string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Compute/virtualMachines?api-version=2022-08-01";
 
                 vm.IsRestQueryBusy = true;
                 vm.MetricsErrorMessage = "";
@@ -954,7 +954,7 @@ namespace Azure.Costs.Common
             
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/serviceTierAdvisors/?api-version=2022-09-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{sqlDb.Subscription.subscriptionId}/resourceGroups/{sqlDb.resourceGroup}/providers/Microsoft.Sql/servers/{sqlDb.serverName}/databases/{sqlDb.name}/serviceTierAdvisors/?api-version=2022-09-01";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -1103,9 +1103,9 @@ namespace Azure.Costs.Common
                                 ,{""type"":""Dimension""
                                     ,""name"":""MeterSubCategory""
                                 }
-                                ,{""type"":""Dimension""
-                                    ,""name"":""Product""
-                                }
+                                //,{""type"":""Dimension""
+                                //    ,""name"":""Product""
+                                //}
                                 ,{""type"":""Dimension""
                                     ,""name"":""Meter""
                                 }
@@ -1115,9 +1115,9 @@ namespace Azure.Costs.Common
                                 ,{""type"":""Dimension""
                                     ,""name"":""PublisherType""
                                 }
-                                ,{""type"":""Dimension""
-                                    ,""name"":""Provider""
-                                }
+                                //,{""type"":""Dimension""
+                                //    ,""name"":""Provider""
+                                //}
                                
                                 ,{""type"":""Dimension""
                                     ,""name"":""MeterCategory""
@@ -1136,11 +1136,11 @@ namespace Azure.Costs.Common
              
 
 
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/providers/Microsoft.CostManagement/query?api-version=2021-10-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/providers/Microsoft.CostManagement/query?api-version=2021-10-01";
             
                 var client = new HttpClient
                 {
-                    BaseAddress = new Uri("https://management.azure.com/subscriptions/")
+                    BaseAddress = new Uri("https://management.usgovcloudapi.net/subscriptions/")
                 };
 
                 client.DefaultRequestHeaders.Remove("Authorization");
@@ -1185,12 +1185,12 @@ namespace Azure.Costs.Common
                         rc.ResourceId = obj[2].ToString();
                         rc.ServiceName = obj[3].ToString();
                         rc.MeterSubCategory = obj[4].ToString();
-                        rc.Product = obj[5].ToString();
-                        rc.Meter = obj[6].ToString();
-                        rc.ChargeType = obj[7].ToString();
-                        rc.PublisherType = obj[8].ToString();
-                        rc.ResourceType = obj[11].ToString();
-                        rc.Currency = obj[12].ToString();
+                        //rc.Product = obj[5].ToString();
+                        rc.Meter = obj[5].ToString();
+                        rc.ChargeType = obj[6].ToString();
+                        //rc.PublisherType = obj[8].ToString();
+                        rc.ResourceType = obj[9].ToString();
+                        rc.Currency = obj[10].ToString();
                         subscription.ResourceCosts.Add(rc);
 
                         //if (rc.ServiceName.Contains("Factory"))
@@ -1273,7 +1273,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/resources?$filter=resourceType eq 'Microsoft.DataFactory/factories' &$expand=resourceGroup,createdTime,changedTime&$top=1000&api-version=2021-04-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/resources?$filter=resourceType eq 'Microsoft.DataFactory/factories' &$expand=resourceGroup,createdTime,changedTime&$top=1000&api-version=2021-04-01";
                 StringContent queryString = new StringContent("api-version=2021-04-01");
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -1289,7 +1289,7 @@ namespace Azure.Costs.Common
                     string sub = factory.id.Substring(factory.id.IndexOf("subscription") + 14);
                     factory.Subscription = subscription;
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/a67ef237-9226-4df4-ad57-da1088b0f830/resourceGroups/dwh-dev-adf/providers/Microsoft.DataFactory/factories/dwh-dev-adf-crm/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoft.com/resource/subscriptions/a67ef237-9226-4df4-ad57-da1088b0f830/resourceGroups/dwh-dev-adf/providers/Microsoft.DataFactory/factories/dwh-dev-adf-crm/overview
                     factory.PortalResourceUrl = $@"{BasePortalUrl}{factory.Subscription.subscriptionId}/resourceGroups/{factory.resourceGroup}/providers/Microsoft.DataFactory/factories/{factory.name}/overview";// ends subscriptions/                    
                 }
                 subscription.DataFactories = factories.value.ToList();
@@ -1303,7 +1303,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Storage/storageAccounts?api-version=2022-05-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Storage/storageAccounts?api-version=2022-05-01";
                 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -1320,7 +1320,7 @@ namespace Azure.Costs.Common
                     string rg = account.id.Substring(account.id.IndexOf("resourceGroup") + 15);
                     account.resourceGroup = rg.Substring(0, rg.IndexOf("/"));
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/4fc5f060-33b6-4e2b-be23-3f3fd7533c28/resourceGroups/oct-louis-mantas-openai-comparison/providers/Microsoft.Storage/storageAccounts/airegulatoryinputdata/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoft.com/resource/subscriptions/4fc5f060-33b6-4e2b-be23-3f3fd7533c28/resourceGroups/oct-louis-mantas-openai-comparison/providers/Microsoft.Storage/storageAccounts/airegulatoryinputdata/overview
                     account.PortalResourceUrl = $@"{BasePortalUrl}{account.Subscription.subscriptionId}/resourceGroups/{account.resourceGroup}/providers/Microsoft.Storage/storageAccounts/{account.name}/overview";// ends subscriptions/
 
                 }
@@ -1336,7 +1336,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Network/virtualNetworks?api-version=2022-05-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Network/virtualNetworks?api-version=2022-05-01";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -1352,7 +1352,7 @@ namespace Azure.Costs.Common
                     string rg = vnet.id.Substring(vnet.id.IndexOf("resourceGroup") + 15);
                     vnet.resourceGroup = rg.Substring(0, rg.IndexOf("/"));
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/a67ef237-9226-4df4-ad57-da1088b0f830/resourceGroups/dwh-dev/providers/Microsoft.Network/virtualNetworks/a67ef237-9226-4df4-ad57-da1088b0f830/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoft.com/resource/subscriptions/a67ef237-9226-4df4-ad57-da1088b0f830/resourceGroups/dwh-dev/providers/Microsoft.Network/virtualNetworks/a67ef237-9226-4df4-ad57-da1088b0f830/overview
                     vnet.PortalResourceUrl = $@"{BasePortalUrl}{vnet.Subscription.subscriptionId}/resourceGroups/{vnet.resourceGroup}/providers/Microsoft.Network/virtualNetworks/{vnet.name}/overview";// ends subscriptions/
 
                 }
@@ -1368,7 +1368,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Compute/virtualMachines?api-version=2022-08-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Compute/virtualMachines?api-version=2022-08-01";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -1384,7 +1384,7 @@ namespace Azure.Costs.Common
                     string rg = vm.id.Substring(vm.id.IndexOf("resourceGroup") + 15);
                     vm.resourceGroup = rg.Substring(0, rg.IndexOf("/"));
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/2bf1d00a-8f74-425c-91ad-40a06372912a/resourceGroups/Devops-Tools/providers/Microsoft.Compute/virtualMachines/AzurePipelineAgent01/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoft.com/resource/subscriptions/2bf1d00a-8f74-425c-91ad-40a06372912a/resourceGroups/Devops-Tools/providers/Microsoft.Compute/virtualMachines/AzurePipelineAgent01/overview
                     vm.PortalResourceUrl = $@"{BasePortalUrl}{vm.Subscription.subscriptionId}/resourceGroups/{vm.resourceGroup}/providers/Microsoft.Compute/virtualMachines/{vm.name}/overview";// ends subscriptions/
 
                 }
@@ -1400,7 +1400,7 @@ namespace Azure.Costs.Common
         {
             try
             {
-                string url = $"https://management.azure.com/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Purview/accounts?api-version=2021-07-01";
+                string url = $"https://management.usgovcloudapi.net/subscriptions/{subscription.subscriptionId}/providers/Microsoft.Purview/accounts?api-version=2021-07-01";
 
                 HttpResponseMessage response = await GetHttpClientAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
@@ -1416,7 +1416,7 @@ namespace Azure.Costs.Common
                     string rg = purv.id.Substring(purv.id.IndexOf("resourceGroup") + 15);
                     purv.resourceGroup = rg.Substring(0, rg.IndexOf("/"));
 
-                    // https://portal.azure.com/#@octopusinvestmentsuk.onmicrosoft.com/resource/subscriptions/7a43fe5a-5ffe-4895-afbf-274567203678/resourceGroups/oct-grp-prd-uks-rg007-purview/providers/Microsoft.Purview/accounts/oct-purview/overview
+                    // https://portal.azure.us/#@chugachgov.onmicrosoftchugachgov/resource/subscriptions/7a43fe5a-5ffe-4895-afbf-274567203678/resourceGroups/oct-grp-prd-uks-rg007-purview/providers/Microsoft.Purview/accounts/oct-purview/overview
                     purv.PortalResourceUrl = $@"{BasePortalUrl}{purv.Subscription.subscriptionId}/resourceGroups/{purv.resourceGroup}/providers/Microsoft.Purview/accounts/{purv.name}/overview";
 
                 }
